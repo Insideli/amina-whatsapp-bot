@@ -1,21 +1,33 @@
-export default function handler(req, res) {
-  if (req.method === "GET") {
-    const mode = req.query["hub.mode"];
-    const token = req.query["hub.verify_token"];
-    const challenge = req.query["hub.challenge"];
+export default {
+  async fetch(request) {
+    const url = new URL(request.url);
 
-    if (mode === "subscribe" && token === process.env.VERIFY_TOKEN) {
-      return res.status(200).send(challenge);
+    if (request.method === "GET") {
+      const mode = url.searchParams.get("hub.mode");
+      const token = url.searchParams.get("hub.verify_token");
+      const challenge = url.searchParams.get("hub.challenge");
+
+      if (
+        mode === "subscribe" &&
+        token === process.env.VERIFY_TOKEN
+      ) {
+        return new Response(challenge, { status: 200 });
+      }
+
+      return new Response("Forbidden", { status: 403 });
     }
 
-    return res.sendStatus(403);
-  }
+    if (request.method === "POST") {
+      const body = await request.json();
 
-  if (req.method === "POST") {
-    console.log("WhatsApp webhook:", JSON.stringify(req.body, null, 2));
+      console.log(
+        "WhatsApp webhook:",
+        JSON.stringify(body, null, 2)
+      );
 
-    return res.sendStatus(200);
-  }
+      return new Response("EVENT_RECEIVED", { status: 200 });
+    }
 
-  return res.sendStatus(405);
-}
+    return new Response("Method Not Allowed", { status: 405 });
+  },
+};
