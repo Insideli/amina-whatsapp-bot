@@ -44,7 +44,7 @@ export default {
         const customerNumber = message.from;
 
         await fetch(
-          `https://graph.facebook.com/v26.0/${process.env.PHONE_NUMBER_ID}/messages`,
+          `https://graph.facebook.com/v25.0/${process.env.PHONE_NUMBER_ID}/messages`,
           {
             method: "POST",
             headers: {
